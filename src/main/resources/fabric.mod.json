@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "teleport-utils",
   "version": "${version}",
-
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Teleport Utils",
+  "description": "Utility functions related to teleport, including commands",
   "authors": [
-    "Me!"
+    "Yunseong Hwang"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/teleport-utils",
+    "issues": "https://github.com/elbakramer/teleport-utils/issues",
+    "sources": "https://github.com/elbakramer/teleport-utils"
   },
-
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
-
+  "license": "MIT",
+  "icon": "assets/teleport-utils/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "io.github.elbakramer.mc.teleportutils.TeleportUtilsMod"
+    ],
+    "modmenu": [
+      "io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModMenuIntegration"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "teleport-utils.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
