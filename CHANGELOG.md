@@ -2,9 +2,8 @@
 
 First non alpha release.
 
-Added two required dependencies (from the same author):
+Added required dependencies (from the same author):
 
-* [mtq-fix](https://www.curseforge.com/minecraft/mc-mods/mtq-fix)
 * [player-vehicle-desync-fix](https://www.curseforge.com/minecraft/mc-mods/player-vehicle-desync-fix)
 
 Changed homepage link to CurseForge.
