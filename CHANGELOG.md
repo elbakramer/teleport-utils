@@ -1,3 +1,7 @@
+#### v0.2.2 (2021-10-14)
+
+Fix config object structure for server support (client is fine)
+
 #### v0.2.1 (2021-10-14)
 
 Added new features related to `Entity.moveToWorld()` method and portal support.

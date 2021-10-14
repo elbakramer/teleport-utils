@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfig;
+import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfigManager;
 import io.github.elbakramer.mc.teleportutils.command.TeleportWithCommand;
 
 public class TeleportUtilsMod implements ModInitializer {
@@ -21,8 +22,8 @@ public class TeleportUtilsMod implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		TeleportUtilsModConfig.register();
-		TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+		TeleportUtilsModConfigManager.register();
+		TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();
 		if (config.registerCommand) {
 			CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 				TeleportWithCommand.register(dispatcher);

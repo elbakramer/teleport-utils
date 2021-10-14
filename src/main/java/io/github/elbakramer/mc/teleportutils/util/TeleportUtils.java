@@ -40,6 +40,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
 import net.minecraft.world.WorldProperties;
 import net.minecraft.world.biome.source.BiomeAccess;
+
 import io.github.elbakramer.mc.teleportutils.TeleportUtilsMod;
 import io.github.elbakramer.mc.teleportutils.mixin.EntityAccessor;
 import io.github.elbakramer.mc.teleportutils.mixin.ServerPlayerEntityAccessor;
@@ -50,7 +51,7 @@ public class TeleportUtils {
     }
 
     private static final Logger LOGGER = TeleportUtilsMod.LOGGER;
-    private static TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();;
+    private static TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();;
 
     public static boolean isRecursive() {
         final StackTraceElement[] trace = Thread.currentThread().getStackTrace();

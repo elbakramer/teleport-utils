@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtils;
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfig;
+import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfigManager;
 
 @Mixin(NetherPortalBlock.class)
 public class NetherPortalBlockMixin {
@@ -18,7 +19,7 @@ public class NetherPortalBlockMixin {
     @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hasVehicle()Z"))
     private boolean bypassHasVehicleTestOnPlayerEntityCollisionWithNetherPortalBlock(Entity entity) {
         if (entity instanceof PlayerEntity) {
-            TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+            TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();
             if (config.playerMoveToWorldWithOthersOnNetherPortal
                     && config.bypassHasVehicleTestOnPlayerEntityCollisionWithNetherPortalBlock) {
                 return false;
@@ -30,7 +31,7 @@ public class NetherPortalBlockMixin {
     @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hasPassengers()Z"))
     private boolean bypassHasPassengersTestOnPlayerEntityCollisionWithNetherPortalBlock(Entity entity) {
         if (entity instanceof PlayerEntity) {
-            TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+            TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();
             if (config.playerMoveToWorldWithOthersOnNetherPortal
                     && config.bypassHasPassengersTestOnPlayerEntityCollisionWithNetherPortalBlock) {
                 return false;
@@ -43,7 +44,7 @@ public class NetherPortalBlockMixin {
     private void propagateLastNetherPortalPositionOnPlayerCollisionWithNetherPortalBlock(Entity entity, BlockPos pos) {
         entity.setInNetherPortal(pos);
         if (entity instanceof PlayerEntity) {
-            TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+            TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();
             if (config.playerMoveToWorldWithOthersOnNetherPortal) {
                 Entity startingEntity = entity;
                 if (entity.hasVehicle() && config.moveToWorldWithVehicle) {

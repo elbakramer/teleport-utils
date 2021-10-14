@@ -7,7 +7,7 @@ public class TeleportUtilsModMenuIntegration implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> TeleportUtilsModConfig.getConfigScreen(parent).get();
+        return parent -> TeleportUtilsModConfigManager.getConfigScreen(parent).get();
     }
 
 }

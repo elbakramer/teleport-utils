@@ -26,6 +26,7 @@ import net.minecraft.world.TeleportTarget;
 
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtils;
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfig;
+import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfigManager;
 
 import static net.minecraft.server.command.CommandManager.*;
 import static net.minecraft.command.argument.EntityAnchorArgumentType.*;
@@ -35,7 +36,7 @@ import static net.minecraft.command.argument.Vec3ArgumentType.*;
 
 public final class TeleportWithCommand implements Command<ServerCommandSource> {
 
-    private static TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+    private static TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

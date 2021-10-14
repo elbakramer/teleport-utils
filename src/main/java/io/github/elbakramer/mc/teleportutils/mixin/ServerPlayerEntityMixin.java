@@ -16,6 +16,7 @@ import net.minecraft.world.TeleportTarget;
 
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtils;
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfig;
+import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfigManager;
 
 @Mixin(ServerPlayerEntity.class)
 public class ServerPlayerEntityMixin {
@@ -23,7 +24,7 @@ public class ServerPlayerEntityMixin {
     @Inject(method = "teleport", at = @At("HEAD"), cancellable = true)
     private void injectToTeleportMethodDirectly(ServerWorld targetWorld, double x, double y, double z, float yaw,
             float pitch, CallbackInfo ci) {
-        TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+        TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();
         if (config.injectPlayersTeleportDirectly) {
             if (!TeleportUtils.isRecursive()) {
                 ServerPlayerEntity self = (ServerPlayerEntity) (Object) this;
@@ -40,7 +41,7 @@ public class ServerPlayerEntityMixin {
     @Nullable
     @Inject(method = "moveToWorld", at = @At("HEAD"), cancellable = true)
     private void injectToMoveToWorldMethodDirectly(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
-        TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+        TeleportUtilsModConfig config = TeleportUtilsModConfigManager.getConfig();
         if (config.injectPlayersMoveToWorldDirectly) {
             if (!TeleportUtils.isRecursive()) {
                 ServerPlayerEntity self = (ServerPlayerEntity) (Object) this;

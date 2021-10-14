@@ -1,14 +1,8 @@
 package io.github.elbakramer.mc.teleportutils.util;
 
-import java.util.function.Supplier;
-
-import net.minecraft.client.gui.screen.Screen;
-
-import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
-import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 
 @Config(name = "teleport-utils")
 public class TeleportUtilsModConfig implements ConfigData {
@@ -161,17 +155,5 @@ public class TeleportUtilsModConfig implements ConfigData {
     @ConfigEntry.Category("portal_misc")
     @ConfigEntry.Gui.Tooltip(count = 2)
     public boolean bypassHasPassengersTestOnPlayerEntityCollisionWithEndPortalBlock = true;
-
-    public static void register() {
-        AutoConfig.register(TeleportUtilsModConfig.class, JanksonConfigSerializer::new);
-    }
-
-    public static TeleportUtilsModConfig getConfig() {
-        return AutoConfig.getConfigHolder(TeleportUtilsModConfig.class).getConfig();
-    }
-
-    public static Supplier<Screen> getConfigScreen(Screen parent) {
-        return AutoConfig.getConfigScreen(TeleportUtilsModConfig.class, parent);
-    }
 
 }
