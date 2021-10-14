@@ -4,7 +4,12 @@
   "package": "io.github.elbakramer.mc.teleportutils.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "ServerPlayerEntityAccessor"
+    "EntityAccessor",
+    "EntityMixin",
+    "EndPortalBlockMixin",
+    "NetherPortalBlockMixin",
+    "ServerPlayerEntityAccessor",
+    "ServerPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

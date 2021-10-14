@@ -1,7 +1,7 @@
 plugins {
-	id 'fabric-loom' version '0.9-SNAPSHOT'
+	id 'fabric-loom'
 	id 'maven-publish'
-	id 'com.matthewprenger.cursegradle' version '1.4.0'
+	id 'com.matthewprenger.cursegradle'
 }
 
 sourceCompatibility = JavaVersion.VERSION_16
@@ -45,11 +45,9 @@ dependencies {
 	}
 	modImplementation "com.terraformersmc:modmenu:2.0.14"
 
-	// Command
-	implementation "com.mojang:brigadier:1.0.18"
-
 	// Player movement fixes
-	modRuntime "curse.maven:player-vehicle-desync-fix-0.1.3-535864:3488372"
+	modRuntime files("../player-vehicle-desync-fix/build/libs/player-vehicle-desync-fix-0.2.1.jar")
+	modRuntime files("../mtq-fix/build/libs/mtq-fix-0.2.1.jar")
 }
 
 processResources {
@@ -69,6 +67,7 @@ tasks.withType(JavaCompile).configureEach {
 
 	// Minecraft 1.17 (21w19a) upwards uses Java 16.
 	it.options.release = 16
+	it.options.deprecation = true
 }
 
 java {
@@ -131,10 +130,11 @@ curseforge {
 		addGameVersion 'Java 16'
 
 		relations {
-			requiredLibrary 'fabric-api'
-			requiredLibrary 'cloth-config'
-			requiredLibrary 'modmenu'
+			requiredDependency 'fabric-api'
+			requiredDependency 'cloth-config'
+			requiredDependency 'modmenu'
 			requiredDependency 'player-vehicle-desync-fix'
+			requiredDependency 'mtq-fix'
 		}
 
 		mainArtifact(remapJar) {

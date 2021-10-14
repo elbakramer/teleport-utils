@@ -1,83 +1,177 @@
 package io.github.elbakramer.mc.teleportutils.util;
 
+import java.util.function.Supplier;
+
+import net.minecraft.client.gui.screen.Screen;
+
+import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 
 @Config(name = "teleport-utils")
 public class TeleportUtilsModConfig implements ConfigData {
 
-    @ConfigEntry.Category("main")
-    @ConfigEntry.Gui.Tooltip
-    public boolean particleEffectsOnDeparture = true;
-
-    @ConfigEntry.Category("main")
-    @ConfigEntry.Gui.Tooltip
-    public boolean particleEffectsOnArrival = true;
-
-    @ConfigEntry.Category("main")
-    @ConfigEntry.Gui.Tooltip
-    public boolean teleportWithPassengers = true;
-
-    @ConfigEntry.Category("main")
-    @ConfigEntry.Gui.Tooltip
-    public boolean forceRidingWhenRidingBack = true;
-
-    @ConfigEntry.Category("main")
-    @ConfigEntry.Gui.Tooltip
-    public boolean teleportWithLeashedAnimals = true;
-
-    @ConfigEntry.Category("main")
+    @ConfigEntry.Category("common")
     @ConfigEntry.Gui.Tooltip
     public double expandAmountForFindingLeashedAnimals = 10.0D;
 
-    @ConfigEntry.Category("main")
+    @ConfigEntry.Category("common")
+    @ConfigEntry.Gui.Tooltip
+    public boolean forceRidingWhenRidingBack = true;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public boolean particleEffectsOnDeparture = true;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public boolean particleEffectsOnArrival = true;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public boolean teleportWithPassengers = true;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public boolean teleportWithLeashedAnimals = true;
+
+    @ConfigEntry.Category("teleport")
     @ConfigEntry.Gui.Tooltip
     public boolean teleportWithVehicle = true;
 
-    @ConfigEntry.Category("main")
+    @ConfigEntry.Category("teleport")
     @ConfigEntry.Gui.Tooltip
     public boolean teleportWithVehicleRecursively = true;
 
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean injectPlayersTeleportDirectly = false;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip
+    public boolean moveToWorldWithPassengers = true;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip
+    public boolean moveToWorldWithLeashedAnimals = true;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip
+    public boolean moveToWorldWithVehicle = true;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip
+    public boolean moveToWorldWithVehicleRecursively = true;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip
+    public boolean followTeleportTargetOnMoveToWorld = true;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip
+    public boolean playerMoveToWorldWithOthersOnNetherPortal = true;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip
+    public boolean playerMoveToWorldWithOthersOnEndPortal = true;
+
+    @ConfigEntry.Category("portal")
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean injectPlayersMoveToWorldDirectly = false;
+
     @ConfigEntry.Category("command")
     @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.Gui.RequiresRestart
     public boolean registerCommand = true;
 
     @ConfigEntry.Category("command")
     @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.Gui.RequiresRestart
     public int commandPermissionLevel = 2;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("common_misc")
+    @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.Gui.PrefixText
+    public boolean dropItemOnDetachLeash = false;
+
+    @ConfigEntry.Category("common_misc")
+    @ConfigEntry.Gui.Tooltip
+    public boolean sendPacketOnAttachLeash = true;
+
+    @ConfigEntry.Category("common_misc")
+    @ConfigEntry.Gui.Tooltip
+    public boolean sendPacketOnDetachLeash = true;
+
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.Gui.PrefixText
     public boolean forceCopyOnEntityTeleport = false;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip
     public boolean loadChunkOnLivingEntityTeleport = true;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip
     public boolean findGroundOnLivingEntityTeleport = false;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip
     public boolean checkAndRevertOnLivingEntityTeleport = false;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip
     public boolean particleEffectOnLivingEntityTeleport = false;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip
     public boolean forceCopyOnLivingEntityTeleport = false;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip(count = 3)
     public boolean setInTeleportationStateOnPlayerTeleport = true;
 
-    @ConfigEntry.Category("misc")
+    @ConfigEntry.Category("teleport_misc")
     @ConfigEntry.Gui.Tooltip
     public boolean stopRidingOnNonPlayerEntityTeleport = true;
+
+    @ConfigEntry.Category("portal_misc")
+    @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.Gui.PrefixText
+    public boolean resetNetherPortalCooldownOnMoveToWorld = true;
+
+    @ConfigEntry.Category("portal_misc")
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean bypassHasVehicleTestOnPlayerEntityCollisionWithNetherPortalBlock = true;
+
+    @ConfigEntry.Category("portal_misc")
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean bypassHasPassengersTestOnPlayerEntityCollisionWithNetherPortalBlock = true;
+
+    @ConfigEntry.Category("portal_misc")
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean bypassHasVehicleTestOnPlayerTickNetherPortal = true;
+
+    @ConfigEntry.Category("portal_misc")
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean bypassHasVehicleTestOnPlayerEntityCollisionWithEndPortalBlock = true;
+
+    @ConfigEntry.Category("portal_misc")
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean bypassHasPassengersTestOnPlayerEntityCollisionWithEndPortalBlock = true;
+
+    public static void register() {
+        AutoConfig.register(TeleportUtilsModConfig.class, JanksonConfigSerializer::new);
+    }
+
+    public static TeleportUtilsModConfig getConfig() {
+        return AutoConfig.getConfigHolder(TeleportUtilsModConfig.class).getConfig();
+    }
+
+    public static Supplier<Screen> getConfigScreen(Screen parent) {
+        return AutoConfig.getConfigScreen(TeleportUtilsModConfig.class, parent);
+    }
 
 }

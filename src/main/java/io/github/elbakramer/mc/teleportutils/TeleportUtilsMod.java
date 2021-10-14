@@ -6,9 +6,6 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
-
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfig;
 import io.github.elbakramer.mc.teleportutils.command.TeleportWithCommand;
 
@@ -24,10 +21,13 @@ public class TeleportUtilsMod implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		AutoConfig.register(TeleportUtilsModConfig.class, JanksonConfigSerializer::new);
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-			TeleportWithCommand.register(dispatcher);
-		});
+		TeleportUtilsModConfig.register();
+		TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
+		if (config.registerCommand) {
+			CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+				TeleportWithCommand.register(dispatcher);
+			});
+		}
 		LOGGER.info("[TeleportUtils] Mod Initialized.");
 	}
 

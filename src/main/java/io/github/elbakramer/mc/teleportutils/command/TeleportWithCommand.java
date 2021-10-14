@@ -12,7 +12,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.command.EntitySelector;
-import net.minecraft.command.argument.*;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.PosArgument;
+import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.command.argument.EntityAnchorArgumentType.EntityAnchor;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -21,13 +24,18 @@ import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.TeleportTarget;
 
-import me.shedaniel.autoconfig.AutoConfig;
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtils;
 import io.github.elbakramer.mc.teleportutils.util.TeleportUtilsModConfig;
 
 import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.command.argument.EntityAnchorArgumentType.*;
+import static net.minecraft.command.argument.EntityArgumentType.*;
+import static net.minecraft.command.argument.RotationArgumentType.*;
+import static net.minecraft.command.argument.Vec3ArgumentType.*;
 
 public final class TeleportWithCommand implements Command<ServerCommandSource> {
+
+    private static TeleportUtilsModConfig config = TeleportUtilsModConfig.getConfig();
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -57,7 +65,7 @@ public final class TeleportWithCommand implements Command<ServerCommandSource> {
         EntityAnchor facingAnchor = null;
 
         try {
-            targetRotation = RotationArgumentType.getRotation(context, "rotation");
+            targetRotation = getRotation(context, "rotation");
         } catch (IllegalArgumentException e1) {
             try {
                 facingLocation = Vec3ArgumentType.getVec3(context, "facingLocation");
@@ -84,7 +92,8 @@ public final class TeleportWithCommand implements Command<ServerCommandSource> {
                 yaw = rot.x;
                 pitch = rot.y;
             } else if (facingLocation != null || facingEntity != null) {
-                Vec3d facingFromLocation = targetLocation;
+                Vec3d facingFromLocation = new Vec3d(targetLocation.x, targetLocation.y + entity.getStandingEyeHeight(),
+                        targetLocation.z);
                 if (facingLocation == null) {
                     if (facingAnchor == null) {
                         facingAnchor = EntityAnchor.EYES;
@@ -97,17 +106,16 @@ public final class TeleportWithCommand implements Command<ServerCommandSource> {
                 }
                 Vec3d rot = facingFromLocation.relativize(facingLocation).normalize();
                 yaw = (float) MathHelper.wrapDegrees(MathHelper.atan2(-rot.x, rot.z) * MathHelper.DEGREES_PER_RADIAN);
-                pitch = (float) MathHelper.wrapDegrees(MathHelper.atan2(new Vec3d(rot.z, 0.0D, rot.z).length(), -rot.y)
+                pitch = (float) MathHelper.wrapDegrees(MathHelper.atan2(-rot.y, new Vec3d(rot.z, 0.0D, rot.z).length())
                         * MathHelper.DEGREES_PER_RADIAN);
             } else {
-                yaw = entity.getPitch();
-                pitch = entity.getYaw();
+                yaw = entity.getYaw();
+                pitch = entity.getPitch();
             }
 
             Vec3d targetVelocity = entity.getVelocity();
             TeleportTarget target = new TeleportTarget(targetLocation, targetVelocity, yaw, pitch);
-            entity = TeleportUtils.teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(entity, target,
-                    null);
+            entity = TeleportUtils.teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(entity, target);
         }
 
         return Command.SINGLE_SUCCESS;
@@ -115,46 +123,42 @@ public final class TeleportWithCommand implements Command<ServerCommandSource> {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         TeleportWithCommand command = new TeleportWithCommand();
-        TeleportUtilsModConfig config = AutoConfig.getConfigHolder(TeleportUtilsModConfig.class).getConfig();
 
         LiteralArgumentBuilder<ServerCommandSource> teleportWith = literal("teleportWith");
 
-        RequiredArgumentBuilder<ServerCommandSource, EntitySelector> destination = argument("destination",
-                EntityArgumentType.entity());
-        RequiredArgumentBuilder<ServerCommandSource, EntitySelector> targets = argument("targets",
-                EntityArgumentType.entities());
-        RequiredArgumentBuilder<ServerCommandSource, PosArgument> location = argument("location",
-                Vec3ArgumentType.vec3());
-        RequiredArgumentBuilder<ServerCommandSource, PosArgument> rotation = argument("rotation",
-                RotationArgumentType.rotation());
+        RequiredArgumentBuilder<ServerCommandSource, EntitySelector> destination = argument("destination", entity());
+        RequiredArgumentBuilder<ServerCommandSource, EntitySelector> targets = argument("targets", entities());
+        RequiredArgumentBuilder<ServerCommandSource, PosArgument> location = argument("location", vec3());
+        RequiredArgumentBuilder<ServerCommandSource, PosArgument> rotation = argument("rotation", rotation());
         LiteralArgumentBuilder<ServerCommandSource> facing = literal("facing");
-        RequiredArgumentBuilder<ServerCommandSource, PosArgument> facingLocation = argument("facingLocation",
-                Vec3ArgumentType.vec3());
+        RequiredArgumentBuilder<ServerCommandSource, PosArgument> facingLocation = argument("facingLocation", vec3());
         LiteralArgumentBuilder<ServerCommandSource> entity = literal("entity");
-        RequiredArgumentBuilder<ServerCommandSource, EntitySelector> facingEntity = argument("facingEntity",
-                EntityArgumentType.entity());
+        RequiredArgumentBuilder<ServerCommandSource, EntitySelector> facingEntity = argument("facingEntity", entity());
         RequiredArgumentBuilder<ServerCommandSource, EntityAnchor> facingAnchor = argument("facingAnchor",
-                EntityAnchorArgumentType.entityAnchor());
+                entityAnchor());
 
         // @formatter:off
         LiteralArgumentBuilder<ServerCommandSource> builder = teleportWith
             .requires(source -> source.hasPermissionLevel(config.commandPermissionLevel))
-            .then(destination.executes(command))
-            .then(location.executes(command))
+            .then(destination
+                .executes(command))
+            .then(location
+                .executes(command))
             .then(targets
-                .then(destination.executes(command))
+                .then(destination
+                    .executes(command))
                 .then(location
-                    .then(rotation.executes(command))
-                    .then(facing
-                        .then(facingLocation.executes(command))
-                        .then(entity.then(facingEntity)
-                            .then(facingAnchor.executes(command))
-                            .executes(command)
-                        )
-                    )
                     .executes(command)
-                )
-            );
+                    .then(rotation
+                        .executes(command))
+                    .then(facing
+                        .then(facingLocation
+                            .executes(command))
+                        .then(entity
+                            .then(facingEntity
+                                .executes(command)
+                                .then(facingAnchor
+                                    .executes(command)))))));
         // @formatter:on
 
         LiteralCommandNode<ServerCommandSource> node = dispatcher.register(builder);
@@ -162,6 +166,7 @@ public final class TeleportWithCommand implements Command<ServerCommandSource> {
         LiteralArgumentBuilder<ServerCommandSource> tpw = literal("tpw");
         LiteralArgumentBuilder<ServerCommandSource> aliasBuilder = tpw.redirect(node);
         dispatcher.register(aliasBuilder);
+
     }
 
 }
