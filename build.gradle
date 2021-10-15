@@ -132,9 +132,9 @@ curseforge {
 		relations {
 			requiredDependency 'fabric-api'
 			requiredDependency 'cloth-config'
-			requiredDependency 'modmenu'
+			optionalDependency 'modmenu'
 			requiredDependency 'player-vehicle-desync-fix'
-			requiredDependency 'mtq-fix'
+			optionalDependency 'mtq-fix'
 		}
 
 		mainArtifact(remapJar) {

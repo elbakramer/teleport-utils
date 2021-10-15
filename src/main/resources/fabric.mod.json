@@ -31,8 +31,11 @@
     "fabric": "*",
     "minecraft": "1.17.x",
     "java": ">=16",
-    "player-vehicle-desync-fix": "*",
-    "mtq-fix": "*"
+    "cloth-config2": "*"
+  },
+  "recommends": {
+    "player-vehicle-desync-fix": ">=0.2.2",
+    "mtq-fix": ">=0.2.2"
   },
   "suggests": {
     "another-mod": "*"
