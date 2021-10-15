@@ -46,8 +46,8 @@ dependencies {
 	modImplementation "com.terraformersmc:modmenu:2.0.14"
 
 	// Player movement fixes
-	modRuntime files("../player-vehicle-desync-fix/build/libs/player-vehicle-desync-fix-0.2.1.jar")
-	modRuntime files("../mtq-fix/build/libs/mtq-fix-0.2.1.jar")
+	modRuntime "curse.maven:player-vehicle-desync-fix-0.2.2-535864:3490516"
+	modRuntime "curse.maven:mtq-fix-0.2.2-535845:3490514"
 }
 
 processResources {

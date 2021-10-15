@@ -1,3 +1,7 @@
+#### v0.2.3 (2021-10-15)
+
+Fix missing config translation.
+
 #### v0.2.2 (2021-10-14)
 
 Fix config object structure for server support (client is fine)

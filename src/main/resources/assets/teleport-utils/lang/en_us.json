@@ -34,6 +34,8 @@
     "text.autoconfig.teleport-utils.option.moveToWorldWithVehicle.@Tooltip": "Move to world with vehicle",
     "text.autoconfig.teleport-utils.option.moveToWorldWithVehicleRecursively": "moveToWorldWithVehicleRecursively",
     "text.autoconfig.teleport-utils.option.moveToWorldWithVehicleRecursively.@Tooltip": "Move to world with vehicles upto root vehicle",
+    "text.autoconfig.teleport-utils.option.followTeleportTargetOnMoveToWorld": "followTeleportTargetOnMoveToWorld",
+    "text.autoconfig.teleport-utils.option.followTeleportTargetOnMoveToWorld.@Tooltip": "Animals follow the teleport destination of owners when using portals",
     "text.autoconfig.teleport-utils.option.playerMoveToWorldWithOthersOnNetherPortal": "playerMoveToWorldWithOthersOnNetherPortal",
     "text.autoconfig.teleport-utils.option.playerMoveToWorldWithOthersOnNetherPortal.@Tooltip": "Use nether portal with other connected entities",
     "text.autoconfig.teleport-utils.option.playerMoveToWorldWithOthersOnEndPortal": "playerMoveToWorldWithOthersOnEndPortal",
