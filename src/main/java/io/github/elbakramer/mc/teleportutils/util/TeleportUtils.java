@@ -35,6 +35,8 @@ import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
@@ -62,10 +64,30 @@ public class TeleportUtils {
 
     public static void spawnPortalParticleEffectAroundEntity(Entity entity) {
         World world = entity.getEntityWorld();
-        if (world instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) world;
+        if (world instanceof ServerWorld serverWorld) {
             serverWorld.sendEntityStatus(entity, (byte) 46);
         }
+    }
+
+    public static void playTeleportSoundFromEntity(Entity entity, float volume, float pitch,
+            @Nullable PlayerEntity except) {
+        World world = entity.getEntityWorld();
+        if (world instanceof ServerWorld serverWorld) {
+            serverWorld.playSoundFromEntity(except, entity, SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.NEUTRAL,
+                    volume, pitch);
+        }
+    }
+
+    public static void playTeleportSoundFromEntity(Entity entity, float volume, float pitch) {
+        playTeleportSoundFromEntity(entity, volume, pitch, null);
+    }
+
+    public static void playTeleportSoundFromEntity(Entity entity, @Nullable PlayerEntity except) {
+        playTeleportSoundFromEntity(entity, config.playTeleportSoundVolume, config.playTeleportSoundPitch, except);
+    }
+
+    public static void playTeleportSoundFromEntity(Entity entity) {
+        playTeleportSoundFromEntity(entity, config.playTeleportSoundVolume, config.playTeleportSoundPitch);
     }
 
     public static Entity entityTeleport(Entity entity, TeleportTarget target) {
@@ -79,11 +101,11 @@ public class TeleportUtils {
         return entity;
     }
 
-    public static Entity entityTeleport(Entity entity, TeleportTarget target, ServerWorld targetWorld,
+    @Nullable
+    public static Entity entityTeleport(Entity entity, TeleportTarget target, @Nullable ServerWorld targetWorld,
             boolean forceCopy) {
         World world = entity.getEntityWorld();
-        if (world instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) world;
+        if (world instanceof ServerWorld serverWorld) {
             if (targetWorld == null) {
                 targetWorld = serverWorld;
             }
@@ -107,13 +129,14 @@ public class TeleportUtils {
         return entity;
     }
 
-    public static Entity entityTeleport(Entity entity, TeleportTarget target, ServerWorld targetWorld) {
+    @Nullable
+    public static Entity entityTeleport(Entity entity, TeleportTarget target, @Nullable ServerWorld targetWorld) {
         return entityTeleport(entity, target, targetWorld, config.forceCopyOnEntityTeleport);
     }
 
     public static void stopNavigation(Entity entity) {
-        if (entity instanceof PathAwareEntity) {
-            ((PathAwareEntity) entity).getNavigation().stop();
+        if (entity instanceof PathAwareEntity pathAwareEntity) {
+            pathAwareEntity.getNavigation().stop();
         }
     }
 
@@ -135,8 +158,7 @@ public class TeleportUtils {
         boolean successfulTeleport = false;
         boolean successful = false;
 
-        if (loadChunk && world instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) world;
+        if (loadChunk && world instanceof ServerWorld serverWorld) {
             ChunkPos chunkPos = new ChunkPos(blockPos);
             serverWorld.getChunkManager().addTicket(ChunkTicketType.POST_TELEPORT, chunkPos, 0, entity.getId());
             world.getChunk(chunkPos.x, chunkPos.z);
@@ -197,11 +219,11 @@ public class TeleportUtils {
         return livingEntityTeleport(entity, target, config.particleEffectOnLivingEntityTeleport);
     }
 
-    public static LivingEntity livingEntityTeleport(LivingEntity entity, TeleportTarget target, ServerWorld targetWorld,
-            boolean forceCopy) {
+    @Nullable
+    public static LivingEntity livingEntityTeleport(LivingEntity entity, TeleportTarget target,
+            @Nullable ServerWorld targetWorld, boolean forceCopy) {
         World world = entity.getEntityWorld();
-        if (world instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) world;
+        if (world instanceof ServerWorld serverWorld) {
             if (targetWorld == null) {
                 targetWorld = serverWorld;
             }
@@ -215,15 +237,16 @@ public class TeleportUtils {
         return entity;
     }
 
+    @Nullable
     public static LivingEntity livingEntityTeleport(LivingEntity entity, TeleportTarget target,
-            ServerWorld targetWorld) {
+            @Nullable ServerWorld targetWorld) {
         return livingEntityTeleport(entity, target, targetWorld, config.forceCopyOnLivingEntityTeleport);
     }
 
     public static ServerPlayerEntity serverPlayerEntityTeleport(ServerPlayerEntity player, TeleportTarget target,
             ServerWorld targetWorld, boolean setInTeleportationState) {
-        ServerPlayerEntityAccessor playerAccessor = (ServerPlayerEntityAccessor) player;
         if (setInTeleportationState) {
+            ServerPlayerEntityAccessor playerAccessor = (ServerPlayerEntityAccessor) player;
             playerAccessor.setInTeleportationState(true);
         }
         player.teleport(targetWorld, target.position.getX(), target.position.getY(), target.position.getZ(), target.yaw,
@@ -238,48 +261,68 @@ public class TeleportUtils {
     }
 
     @Nullable
-    public static Entity teleportEntity(Entity entity, TeleportTarget target, ServerWorld targetWorld,
-            boolean particleEffectsOnDeparture, boolean particleEffectsOnArrival) {
+    public static Entity teleportEntity(Entity entity, TeleportTarget target, @Nullable ServerWorld targetWorld,
+            boolean particleEffectsOnDeparture, boolean particleEffectsOnArrival, boolean playTeleportSoundOnDeparture,
+            boolean playTeleportSoundOnArrival) {
         World world = entity.getEntityWorld();
-        if (world instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) world;
+        if (world instanceof ServerWorld serverWorld) {
             if (targetWorld == null) {
                 targetWorld = serverWorld;
             }
             if (particleEffectsOnDeparture) {
                 spawnPortalParticleEffectAroundEntity(entity);
             }
-            if (entity instanceof ServerPlayerEntity) {
-                ServerPlayerEntity player = (ServerPlayerEntity) entity;
+            if (playTeleportSoundOnDeparture) {
+                playTeleportSoundFromEntity(entity);
+            }
+            if (entity instanceof ServerPlayerEntity player) {
                 entity = serverPlayerEntityTeleport(player, target, targetWorld);
             } else {
                 if (config.stopRidingOnNonPlayerEntityTeleport) {
                     stopRiding(entity);
                 }
-                if (entity instanceof LivingEntity) {
-                    LivingEntity animal = (LivingEntity) entity;
+                if (entity instanceof LivingEntity animal) {
                     entity = livingEntityTeleport(animal, target, targetWorld);
                 } else {
                     entity = entityTeleport(entity, target, targetWorld);
                 }
             }
-            if (entity != null && particleEffectsOnArrival) {
-                spawnPortalParticleEffectAroundEntity(entity);
+            if (entity != null) {
+                if (particleEffectsOnArrival) {
+                    spawnPortalParticleEffectAroundEntity(entity);
+                }
+                if (playTeleportSoundOnArrival) {
+                    PlayerEntity except = null;
+                    if (entity instanceof PlayerEntity) {
+                        except = (PlayerEntity) entity;
+                    }
+                    // don't play teleport sound on arrival to himself
+                    playTeleportSoundFromEntity(entity, except);
+                }
             }
         }
         return entity;
     }
 
     @Nullable
-    public static Entity teleportEntity(Entity entity, TeleportTarget target, ServerWorld targetWorld,
-            boolean particleEffects) {
-        return teleportEntity(entity, target, targetWorld, particleEffects, particleEffects);
+    public static Entity teleportEntity(Entity entity, TeleportTarget target, @Nullable ServerWorld targetWorld,
+            boolean particleEffects, boolean playTeleportSound) {
+        return teleportEntity(entity, target, targetWorld, particleEffects, particleEffects, playTeleportSound,
+                playTeleportSound);
     }
 
     @Nullable
-    public static Entity teleportEntity(Entity entity, TeleportTarget target, ServerWorld targetWorld) {
+    public static Entity teleportEntity(Entity entity, TeleportTarget target, @Nullable ServerWorld targetWorld,
+            boolean particleEffects) {
+        return teleportEntity(entity, target, targetWorld, particleEffects, particleEffects,
+                config.playTeleportSoundOnDeparture, config.playTeleportSoundOnArrival);
+    }
+
+    @Nullable
+    public static Entity teleportEntity(Entity entity, TeleportTarget target, @Nullable ServerWorld targetWorld) {
         return teleportEntity(entity, target, targetWorld, config.particleEffectsOnDeparture,
-                config.particleEffectsOnArrival);
+                config.particleEffectsOnArrival, config.playTeleportSoundOnDeparture,
+                config.playTeleportSoundOnArrival);
     }
 
     public static boolean startRiding(Entity passenger, Entity vehicle, boolean forceRiding) {
@@ -321,10 +364,10 @@ public class TeleportUtils {
 
     @Nullable
     public static Entity teleportEntityWithItsPassengersAndLeashedAnimalsRecursively(Entity entity,
-            TeleportTarget target, ServerWorld targetWorld, boolean particleEffectsOnDeparture,
-            boolean particleEffectsOnArrival, boolean withPassengers, boolean forceRiding, boolean withLeashedAnimals,
-            double expandAmount, boolean sendPacketOnDetachLeash, boolean dropItemOnDetachLeash,
-            boolean sendPacketOnAttachLeash) {
+            TeleportTarget target, @Nullable ServerWorld targetWorld, boolean particleEffectsOnDeparture,
+            boolean particleEffectsOnArrival, boolean playTeleportSoundOnDeparture, boolean playTeleportSoundOnArrival,
+            boolean withPassengers, boolean forceRiding, boolean withLeashedAnimals, double expandAmount,
+            boolean sendPacketOnDetachLeash, boolean dropItemOnDetachLeash, boolean sendPacketOnAttachLeash) {
         List<Entity> passengers = entity.getPassengerList();
         List<MobEntity> leashedAnimals = findLeashedAnimals(entity, expandAmount);
 
@@ -348,7 +391,8 @@ public class TeleportUtils {
 
         LOGGER.info("[TeleportUtils] Teleporting {} {}", entityType, entityName);
         Entity oldEntity = entity;
-        entity = teleportEntity(entity, target, targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival);
+        entity = teleportEntity(entity, target, targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival,
+                playTeleportSoundOnDeparture, playTeleportSoundOnArrival);
 
         if (entity != null) {
             LOGGER.info("[TeleportUtils] {} {} teleported successsfully",
@@ -361,9 +405,10 @@ public class TeleportUtils {
                             entityName);
                     Entity oldPassenger = passenger;
                     passenger = teleportEntityWithItsPassengersAndLeashedAnimalsRecursively(passenger, target,
-                            targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival, withPassengers,
-                            forceRiding, withLeashedAnimals, expandAmount, sendPacketOnDetachLeash,
-                            dropItemOnDetachLeash, sendPacketOnAttachLeash);
+                            targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival,
+                            playTeleportSoundOnDeparture, playTeleportSoundOnArrival, withPassengers, forceRiding,
+                            withLeashedAnimals, expandAmount, sendPacketOnDetachLeash, dropItemOnDetachLeash,
+                            sendPacketOnAttachLeash);
                     if (passenger != null) {
                         LOGGER.info("[TeleportUtils] Passenger {} teleported successfully, riding {} back",
                                 passengerName, entityName);
@@ -390,9 +435,10 @@ public class TeleportUtils {
                             entityName);
                     MobEntity oldAnimal = animal;
                     animal = (MobEntity) teleportEntityWithItsPassengersAndLeashedAnimalsRecursively(animal, target,
-                            targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival, withPassengers,
-                            forceRiding, withLeashedAnimals, expandAmount, sendPacketOnDetachLeash,
-                            dropItemOnDetachLeash, sendPacketOnAttachLeash);
+                            targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival,
+                            playTeleportSoundOnDeparture, playTeleportSoundOnArrival, withPassengers, forceRiding,
+                            withLeashedAnimals, expandAmount, sendPacketOnDetachLeash, dropItemOnDetachLeash,
+                            sendPacketOnAttachLeash);
                     if (animal != null) {
                         LOGGER.info("[TeleportUtils] Animal {} teleported successfully (animal of {})", animalName,
                                 entityName);
@@ -416,10 +462,11 @@ public class TeleportUtils {
 
     @Nullable
     public static Entity teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(Entity entity,
-            TeleportTarget target, ServerWorld targetWorld, boolean particleEffectsOnDeparture,
-            boolean particleEffectsOnArrival, boolean withPassengers, boolean forceRiding, boolean withLeashedAnimals,
-            double expandAmount, boolean sendPacketOnDetachLeash, boolean dropItemOnDetachLeash,
-            boolean sendPacketOnAttachLeash, boolean withVehicle, boolean withVehicleRecursively) {
+            TeleportTarget target, @Nullable ServerWorld targetWorld, boolean particleEffectsOnDeparture,
+            boolean particleEffectsOnArrival, boolean playTeleportSoundOnDeparture, boolean playTeleportSoundOnArrival,
+            boolean withPassengers, boolean forceRiding, boolean withLeashedAnimals, double expandAmount,
+            boolean sendPacketOnDetachLeash, boolean dropItemOnDetachLeash, boolean sendPacketOnAttachLeash,
+            boolean withVehicle, boolean withVehicleRecursively) {
         Entity startingEntity = entity;
 
         if (entity.hasVehicle() && withVehicle) {
@@ -438,22 +485,45 @@ public class TeleportUtils {
 
         stopRiding(startingEntity);
         startingEntity = teleportEntityWithItsPassengersAndLeashedAnimalsRecursively(startingEntity, target,
-                targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival, withPassengers, forceRiding,
-                withLeashedAnimals, expandAmount, sendPacketOnDetachLeash, dropItemOnDetachLeash,
-                sendPacketOnAttachLeash);
+                targetWorld, particleEffectsOnDeparture, particleEffectsOnArrival, playTeleportSoundOnDeparture,
+                playTeleportSoundOnArrival, withPassengers, forceRiding, withLeashedAnimals, expandAmount,
+                sendPacketOnDetachLeash, dropItemOnDetachLeash, sendPacketOnAttachLeash);
 
         return entity; // TODO: Find teleported entity (in case of copy) and return that instead
     }
 
     @Nullable
     public static Entity teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(Entity entity,
-            TeleportTarget target, ServerWorld targetWorld) {
+            TeleportTarget target, @Nullable ServerWorld targetWorld, boolean particleEffects,
+            boolean playTeleportSound) {
         return teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(entity, target, targetWorld,
-                config.particleEffectsOnDeparture, config.particleEffectsOnArrival, config.teleportWithPassengers,
+                particleEffects, particleEffects, playTeleportSound, playTeleportSound, config.teleportWithPassengers,
                 config.forceRidingWhenRidingBack, config.teleportWithLeashedAnimals,
                 config.expandAmountForFindingLeashedAnimals, config.sendPacketOnDetachLeash,
-                config.dropItemOnDetachLeash, config.sendPacketOnAttachLeash, config.teleportWithVehicleRecursively,
+                config.dropItemOnDetachLeash, config.sendPacketOnAttachLeash, config.teleportWithVehicle,
                 config.teleportWithVehicleRecursively);
+    }
+
+    @Nullable
+    public static Entity teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(Entity entity,
+            TeleportTarget target, @Nullable ServerWorld targetWorld, boolean particleEffects) {
+        return teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(entity, target, targetWorld,
+                particleEffects, particleEffects, config.playTeleportSoundOnDeparture,
+                config.playTeleportSoundOnArrival, config.teleportWithPassengers, config.forceRidingWhenRidingBack,
+                config.teleportWithLeashedAnimals, config.expandAmountForFindingLeashedAnimals,
+                config.sendPacketOnDetachLeash, config.dropItemOnDetachLeash, config.sendPacketOnAttachLeash,
+                config.teleportWithVehicle, config.teleportWithVehicleRecursively);
+    }
+
+    @Nullable
+    public static Entity teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(Entity entity,
+            TeleportTarget target, @Nullable ServerWorld targetWorld) {
+        return teleportEntityWithItsPassengersLeashedAnimalsAndVehiclesRecursively(entity, target, targetWorld,
+                config.particleEffectsOnDeparture, config.particleEffectsOnArrival, config.playTeleportSoundOnDeparture,
+                config.playTeleportSoundOnArrival, config.teleportWithPassengers, config.forceRidingWhenRidingBack,
+                config.teleportWithLeashedAnimals, config.expandAmountForFindingLeashedAnimals,
+                config.sendPacketOnDetachLeash, config.dropItemOnDetachLeash, config.sendPacketOnAttachLeash,
+                config.teleportWithVehicle, config.teleportWithVehicleRecursively);
     }
 
     @Nullable
@@ -614,12 +684,11 @@ public class TeleportUtils {
             if (resetNetherPortalCooldown) {
                 entity.resetNetherPortalCooldown();
             }
-            if (entity instanceof ServerPlayerEntity) {
-                ServerPlayerEntity player = (ServerPlayerEntity) entity;
+            if (entity instanceof ServerPlayerEntity player) {
                 entity = serverPlayerEntityMoveToWorld(player, destination, teleportTarget);
             } else {
-                if (entity instanceof MerchantEntity) {
-                    ((MerchantEntity) entity).setCurrentCustomer((PlayerEntity) null);
+                if (entity instanceof MerchantEntity merchantEntity) {
+                    merchantEntity.setCurrentCustomer((PlayerEntity) null);
                 }
                 entity = entityMoveToWorld(entity, destination, teleportTarget);
             }
@@ -635,8 +704,7 @@ public class TeleportUtils {
     @Nullable
     public static Entity getEntityToFollow(Entity entity) {
         // owner
-        if (entity instanceof TameableEntity) {
-            TameableEntity tameable = (TameableEntity) entity;
+        if (entity instanceof TameableEntity tameable) {
             LivingEntity owner = tameable.getOwner();
             if (owner != null) {
                 return owner;
@@ -650,8 +718,7 @@ public class TeleportUtils {
             }
         }
         // holder
-        if (entity instanceof MobEntity) {
-            MobEntity mob = (MobEntity) entity;
+        if (entity instanceof MobEntity mob) {
             Entity holding = mob.getHoldingEntity();
             if (holding != null) {
                 return holding;

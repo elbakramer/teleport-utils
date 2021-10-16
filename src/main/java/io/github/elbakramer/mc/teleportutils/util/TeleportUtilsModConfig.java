@@ -17,11 +17,27 @@ public class TeleportUtilsModConfig implements ConfigData {
 
     @ConfigEntry.Category("teleport")
     @ConfigEntry.Gui.Tooltip
-    public boolean particleEffectsOnDeparture = true;
+    public boolean particleEffectsOnDeparture = false;
 
     @ConfigEntry.Category("teleport")
     @ConfigEntry.Gui.Tooltip
-    public boolean particleEffectsOnArrival = true;
+    public boolean particleEffectsOnArrival = false;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public boolean playTeleportSoundOnDeparture = false;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public boolean playTeleportSoundOnArrival = false;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public float playTeleportSoundVolume = 1F;
+
+    @ConfigEntry.Category("teleport")
+    @ConfigEntry.Gui.Tooltip
+    public float playTeleportSoundPitch = 1F;
 
     @ConfigEntry.Category("teleport")
     @ConfigEntry.Gui.Tooltip

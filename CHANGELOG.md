@@ -1,3 +1,7 @@
+#### v0.2.6 (2021-10-17)
+
+Added teleport sound support.
+
 #### v0.2.5 (2021-10-16)
 
 Fix cloth-config2 dependency in fabric.mod.json
